@@ -7,9 +7,22 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+
+#if defined(_WIN32)
+#include <windows.h>
+void ui_get_term_size(int *out_w, int *out_h) {
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+  if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
+    *out_w = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    *out_h = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+    return;
+  }
+  *out_w = 120;
+  *out_h = 35;
+}
+#else
 #include <sys/ioctl.h>
 #include <unistd.h>
-
 void ui_get_term_size(int *out_w, int *out_h) {
   struct winsize ws;
   if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == 0) {
@@ -20,6 +33,7 @@ void ui_get_term_size(int *out_w, int *out_h) {
   *out_w = 120;
   *out_h = 35;
 }
+#endif
 
 void ui_init(Ui *ui) {
   memset(ui, 0, sizeof(*ui));
