@@ -2,6 +2,7 @@
 #include "core/datetime.h"
 #include "storage/db.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 static const char *PATH_RX="data/rx.dat";

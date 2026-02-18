@@ -1,6 +1,7 @@
 #include "storage/migrations.h"
 
 #include "core/fs.h"
+#include "core/str.h"
 #include "security/password.h"
 #include "security/rbac.h"
 #include "storage/repo_roles.h"
