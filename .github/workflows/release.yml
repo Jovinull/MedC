@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install static libc
+        run: sudo apt-get update && sudo apt-get install -y gcc libc6-dev
+
+      - name: Build static binary
+        run: |
+          make clean
+          make build CFLAGS="-std=c11 -O2 -Wall -Wextra -Wpedantic -static" LDFLAGS="-static"
+          mv hosp_mvp MedC-linux-x86_64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-binary
+          path: MedC-linux-x86_64
+
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          install: mingw-w64-x86_64-gcc make
+
+      - name: Build static binary
+        run: |
+          make clean
+          make build CC=gcc CFLAGS="-std=c11 -O2 -Wall -Wextra -Wpedantic -static" LDFLAGS="-static"
+          mv hosp_mvp.exe MedC-windows-x86_64.exe 2>/dev/null || mv hosp_mvp MedC-windows-x86_64.exe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-binary
+          path: MedC-windows-x86_64.exe
+
+  release:
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          body: |
+            ## MedC — Gestão Hospitalar (MVP)
+
+            Sistema de gestão hospitalar com TUI ANSI, autenticação SHA-256+salt, RBAC e persistência em arquivos binários.
+
+            ### Downloads
+
+            | Plataforma | Arquivo | Nota |
+            |------------|---------|------|
+            | Linux x86_64 | `MedC-linux-x86_64` | Tornar executável: `chmod +x MedC-linux-x86_64` |
+            | Windows x86_64 | `MedC-windows-x86_64.exe` | Executar em terminal (cmd / PowerShell) |
+
+            > **Sem dependências externas.** Binários estaticamente linkados — basta baixar e rodar.
+
+            ### Primeiro uso
+
+            Na primeira execução a pasta `data/` é criada automaticamente.
+            - Usuário: `admin`
+            - Senha: `admin123`
+            - Troca de senha obrigatória no primeiro login.
+          files: |
+            artifacts/linux-binary/MedC-linux-x86_64
+            artifacts/windows-binary/MedC-windows-x86_64.exe
