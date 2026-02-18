@@ -7,6 +7,7 @@
 #include "ui/widgets.h"
 #include "core/datetime.h"
 #include "core/str.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
