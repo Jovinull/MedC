@@ -5,7 +5,9 @@
 #include "storage/repo_rx.h"
 #include "storage/repo_audit.h"
 #include "ui/widgets.h"
+#include "core/datetime.h"
 #include "core/str.h"
+#include <stdlib.h>
 #include <string.h>
 
 int consult_sel=0;

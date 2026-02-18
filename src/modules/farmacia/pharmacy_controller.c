@@ -7,6 +7,7 @@
 #include "storage/repo_audit.h"
 #include "ui/widgets.h"
 #include "core/str.h"
+#include <stdlib.h>
 #include <string.h>
 
 int pharmacy_tab=0; /* 0 meds, 1 lots, 2 reports */

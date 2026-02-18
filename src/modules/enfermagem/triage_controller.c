@@ -5,6 +5,7 @@
 #include "storage/repo_audit.h"
 #include "ui/widgets.h"
 #include "core/str.h"
+#include <stdlib.h>
 #include <string.h>
 
 int triage_sel=0;

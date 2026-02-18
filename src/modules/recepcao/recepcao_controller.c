@@ -3,8 +3,10 @@
 #include "storage/repo_patients.h"
 #include "storage/repo_visits.h"
 #include "storage/repo_audit.h"
+#include "core/datetime.h"
 #include "core/str.h"
 #include "ui/widgets.h"
+#include <stdlib.h>
 #include <string.h>
 
 int recepcao_sel=0;
