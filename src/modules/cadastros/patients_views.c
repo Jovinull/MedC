@@ -7,8 +7,8 @@
 #include <string.h>
 #include <stdio.h>
 
-extern int sel;
-extern char filter[32];
+extern int patients_sel;
+extern char patients_filter[32];
 
 void patients_views_draw(App *app, Rect c){
   widgets_draw_table_header(&app->ui,c.y+1,c.x+2,"Cadastros • Pacientes");
@@ -20,17 +20,17 @@ void patients_views_draw(App *app, Rect c){
   int idxs[256]; int k=0;
   for(int i=0;i<n;i++){
     if(!list[i].active) continue;
-    if(filter[0]==0 || str_has(list[i].name,filter) || str_has(list[i].cpf,filter)) idxs[k++]=i;
+    if(patients_filter[0]==0 || str_has(list[i].name,patients_filter) || str_has(list[i].cpf,patients_filter)) idxs[k++]=i;
   }
 
-  ui_print(c.y+5,c.x+2,90,49,"Filtro: %s", filter[0]?filter:"(nenhum)");
+  ui_print(c.y+5,c.x+2,90,49,"Filtro: %s", patients_filter[0]?patients_filter:"(nenhum)");
   ui_print(c.y+6,c.x+2,90,49,"ID   Nome                           CPF            Nasc       Tel");
 
   int row=c.y+7;
   for(int i=0;i<k && i< (c.h-9); i++){
     Patient *p=&list[idxs[i]];
-    int fg = (i==sel) ? 97 : 90;
-    int bg = (i==sel) ? 47 : 49;
+    int fg = (i==patients_sel) ? 97 : 90;
+    int bg = (i==patients_sel) ? 47 : 49;
     ui_print(row+i,c.x+2,fg,bg,"%4d %-30s %-13s %-10s %-14s",
              p->id,p->name,p->cpf,p->birth_date,p->phone);
   }

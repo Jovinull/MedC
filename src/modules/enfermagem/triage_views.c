@@ -6,7 +6,7 @@
 #include "ui/theme.h"
 #include <stdio.h>
 
-extern int sel;
+extern int triage_sel;
 
 void triage_views_draw(App *app, Rect c){
   widgets_draw_table_header(&app->ui,c.y+1,c.x+2,"Enfermagem • Classificação de Risco");
@@ -17,7 +17,7 @@ void triage_views_draw(App *app, Rect c){
   for(int i=0;i<n;i++){
     if(list[i].status==VISIT_EM_TRIAGEM) idxs[k++]=i;
   }
-  if(sel>=k) sel = k? k-1:0;
+  if(triage_sel>=k) triage_sel = k? k-1:0;
 
   ui_print(c.y+6,c.x+2,90,49,"ID   Paciente                     Abertura            Queixa");
   int row=c.y+7;
@@ -26,8 +26,8 @@ void triage_views_draw(App *app, Rect c){
     Patient p; repo_patients_find_by_id(v->patient_id,&p);
     char dt[20]; dt_format_ymd_hms(dt,v->opened_at);
 
-    int fg=(i==sel)?97:90;
-    int bg=(i==sel)?47:49;
+    int fg=(i==triage_sel)?97:90;
+    int bg=(i==triage_sel)?47:49;
     ui_print(row+i,c.x+2,fg,bg,"%4d %-28s %-19s %.32s",
              v->id,p.name,dt,v->complaint);
   }

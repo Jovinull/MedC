@@ -9,11 +9,11 @@
 #include "core/str.h"
 #include <string.h>
 
-static int tab=0; /* 0 meds, 1 lots, 2 reports */
-static int sel=0;
+int pharmacy_tab=0; /* 0 meds, 1 lots, 2 reports */
+int pharmacy_sel=0;
 
 void pharmacy_controller_reset(void){
-  tab=0; sel=0;
+  pharmacy_tab=0; pharmacy_sel=0;
   repo_meds_init_store();
   repo_stock_init_store();
   repo_rx_init_store();
@@ -158,21 +158,21 @@ static void out_by_rx(App *app){
 void pharmacy_controller_render(App *app, Rect c){ pharmacy_views_draw(app,c); }
 
 void pharmacy_controller_key(App *app, KeyEvent ev){
-  if(ev.type==KEY_LEFT){ if(tab>0) tab--; sel=0; return; }
-  if(ev.type==KEY_RIGHT){ if(tab<2) tab++; sel=0; return; }
+  if(ev.type==KEY_LEFT){ if(pharmacy_tab>0) pharmacy_tab--; pharmacy_sel=0; return; }
+  if(ev.type==KEY_RIGHT){ if(pharmacy_tab<2) pharmacy_tab++; pharmacy_sel=0; return; }
 
-  if(tab==0){
+  if(pharmacy_tab==0){
     Med meds[128]; int n=repo_meds_list(meds,128);
-    if(sel>=n) sel = n? n-1:0;
-    if(ev.type==KEY_UP){ if(sel>0) sel--; return; }
-    if(ev.type==KEY_DOWN){ if(sel<n-1) sel++; return; }
+    if(pharmacy_sel>=n) pharmacy_sel = n? n-1:0;
+    if(ev.type==KEY_UP){ if(pharmacy_sel>0) pharmacy_sel--; return; }
+    if(ev.type==KEY_DOWN){ if(pharmacy_sel<n-1) pharmacy_sel++; return; }
     if(ev.type==KEY_CHAR && (ev.ch=='n'||ev.ch=='N')){ med_create(app); return; }
     if(ev.type==KEY_CHAR && (ev.ch=='i'||ev.ch=='I')){ lot_in(app); return; }
     if(ev.type==KEY_CHAR && (ev.ch=='o'||ev.ch=='O')){ out_manual(app); return; }
     if(ev.type==KEY_CHAR && (ev.ch=='r'||ev.ch=='R')){ out_by_rx(app); return; }
     return;
   }
-  if(tab==1){
+  if(pharmacy_tab==1){
     /* lots/moves apenas leitura neste MVP */
     if(ev.type==KEY_CHAR && (ev.ch=='i'||ev.ch=='I')){ lot_in(app); return; }
     if(ev.type==KEY_CHAR && (ev.ch=='o'||ev.ch=='O')){ out_manual(app); return; }

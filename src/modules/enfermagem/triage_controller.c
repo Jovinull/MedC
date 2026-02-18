@@ -7,10 +7,10 @@
 #include "core/str.h"
 #include <string.h>
 
-static int sel=0;
+int triage_sel=0;
 
 void triage_controller_reset(void){
-  sel=0;
+  triage_sel=0;
   repo_visits_init_store();
   repo_triage_init_store();
 }
@@ -60,12 +60,12 @@ void triage_controller_key(App *app, KeyEvent ev){
   for(int i=0;i<n;i++){
     if(list[i].status==VISIT_EM_TRIAGEM) idxs[k++]=i;
   }
-  if(sel>=k) sel = k? k-1:0;
+  if(triage_sel>=k) triage_sel = k? k-1:0;
 
-  if(ev.type==KEY_UP){ if(sel>0) sel--; return; }
-  if(ev.type==KEY_DOWN){ if(sel<k-1) sel++; return; }
+  if(ev.type==KEY_UP){ if(triage_sel>0) triage_sel--; return; }
+  if(ev.type==KEY_DOWN){ if(triage_sel<k-1) triage_sel++; return; }
   if(ev.type==KEY_ENTER && k>0){
-    Visit v=list[idxs[sel]];
+    Visit v=list[idxs[triage_sel]];
     triage_fill(app,&v);
     return;
   }

@@ -9,11 +9,11 @@
 #include "core/str.h"
 #include <string.h>
 
-static int tab=0; /* 0 users, 1 audit */
-static int sel=0;
+int admin_tab=0; /* 0 users, 1 audit */
+int admin_sel=0;
 
 void admin_controller_reset(void){
-  tab=0; sel=0;
+  admin_tab=0; admin_sel=0;
   repo_users_init_store();
   repo_roles_init_store();
 }
@@ -61,17 +61,17 @@ static void toggle_active(App *app, User *u){
 void admin_controller_render(App *app, Rect c){ admin_views_draw(app,c); }
 
 void admin_controller_key(App *app, KeyEvent ev){
-  if(ev.type==KEY_LEFT){ if(tab>0) tab--; sel=0; return; }
-  if(ev.type==KEY_RIGHT){ if(tab<1) tab++; sel=0; return; }
+  if(ev.type==KEY_LEFT){ if(admin_tab>0) admin_tab--; admin_sel=0; return; }
+  if(ev.type==KEY_RIGHT){ if(admin_tab<1) admin_tab++; admin_sel=0; return; }
 
-  if(tab==0){
+  if(admin_tab==0){
     User users[128]; int n=repo_users_list(users,128);
-    if(sel>=n) sel = n? n-1:0;
-    if(ev.type==KEY_UP){ if(sel>0) sel--; return; }
-    if(ev.type==KEY_DOWN){ if(sel<n-1) sel++; return; }
+    if(admin_sel>=n) admin_sel = n? n-1:0;
+    if(ev.type==KEY_UP){ if(admin_sel>0) admin_sel--; return; }
+    if(ev.type==KEY_DOWN){ if(admin_sel<n-1) admin_sel++; return; }
     if(ev.type==KEY_CHAR && (ev.ch=='n'||ev.ch=='N')){ user_create(app); return; }
     if(ev.type==KEY_ENTER && n>0){
-      User u = users[sel];
+      User u = users[admin_sel];
       if(u.id==app->session.user_id){
         ui_toast(&app->ui,"Você não pode desativar seu próprio usuário.");
         return;

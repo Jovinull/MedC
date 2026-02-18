@@ -7,12 +7,12 @@
 #include "ui/widgets.h"
 #include <string.h>
 
-static int sel=0;
-static int status_filter=0; /* 0=todos, 1..4 */
-static char search[32];
+int recepcao_sel=0;
+int recepcao_status_filter=0; /* 0=todos, 1..4 */
+char recepcao_search[32];
 
 void recepcao_controller_reset(void){
-  sel=0; status_filter=0; search[0]=0;
+  recepcao_sel=0; recepcao_status_filter=0; recepcao_search[0]=0;
   repo_patients_init_store(); repo_visits_init_store();
 }
 
@@ -61,37 +61,37 @@ void recepcao_controller_key(App *app, KeyEvent ev){
 
   int idxs[256]; int k=0;
   for(int i=0;i<n;i++){
-    if(status_filter!=0 && (int)list[i].status!=status_filter) continue;
-    if(search[0]!=0 && !str_has(list[i].complaint,search)) continue;
+    if(recepcao_status_filter!=0 && (int)list[i].status!=recepcao_status_filter) continue;
+    if(recepcao_search[0]!=0 && !str_has(list[i].complaint,recepcao_search)) continue;
     idxs[k++]=i;
   }
-  if(sel>=k) sel = k? k-1:0;
+  if(recepcao_sel>=k) recepcao_sel = k? k-1:0;
 
-  if(ev.type==KEY_UP){ if(sel>0) sel--; return; }
-  if(ev.type==KEY_DOWN){ if(sel<k-1) sel++; return; }
+  if(ev.type==KEY_UP){ if(recepcao_sel>0) recepcao_sel--; return; }
+  if(ev.type==KEY_DOWN){ if(recepcao_sel<k-1) recepcao_sel++; return; }
 
   if(ev.type==KEY_CHAR && (ev.ch=='n'||ev.ch=='N')){ create_checkin(app); return; }
 
   if(ev.type==KEY_CHAR && (ev.ch=='f'||ev.ch=='F')){
     /* alterna filtros de status */
-    status_filter = (status_filter + 1) % 5;
-    sel=0;
+    recepcao_status_filter = (recepcao_status_filter + 1) % 5;
+    recepcao_sel=0;
     return;
   }
 
   if(ev.type==KEY_SLASH){
     InputField f[1]; memset(f,0,sizeof(f));
     strncpy(f[0].label,"Buscar queixa",31);
-    str_safe_copy(f[0].value,sizeof(f[0].value),search);
+    str_safe_copy(f[0].value,sizeof(f[0].value),recepcao_search);
     if(widgets_modal_form(&app->ui,"Busca",f,1,"Enter aplica")){
-      str_safe_copy(search,sizeof(search),f[0].value);
-      sel=0;
+      str_safe_copy(recepcao_search,sizeof(recepcao_search),f[0].value);
+      recepcao_sel=0;
     }
     return;
   }
 
   if(ev.type==KEY_ENTER && k>0){
-    Visit v = list[idxs[sel]];
+    Visit v = list[idxs[recepcao_sel]];
     if(v.status == VISIT_ENCERRADO){
       ui_toast(&app->ui,"Já encerrado.");
       return;

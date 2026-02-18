@@ -8,7 +8,7 @@
 #include "ui/theme.h"
 #include <stdio.h>
 
-extern int sel;
+extern int consult_sel;
 
 void consult_views_draw(App *app, Rect c){
   widgets_draw_table_header(&app->ui,c.y+1,c.x+2,"Consultório • Atendimentos em consulta");
@@ -19,7 +19,7 @@ void consult_views_draw(App *app, Rect c){
   for(int i=0;i<n;i++){
     if(list[i].status==VISIT_EM_CONSULTA) idxs[k++]=i;
   }
-  if(sel>=k) sel = k? k-1:0;
+  if(consult_sel>=k) consult_sel = k? k-1:0;
 
   ui_print(c.y+6,c.x+2,90,49,"ID   Paciente                     Abertura            Queixa");
   int row=c.y+7;
@@ -27,13 +27,13 @@ void consult_views_draw(App *app, Rect c){
     Visit *v=&list[idxs[i]];
     Patient p; repo_patients_find_by_id(v->patient_id,&p);
     char dt[20]; dt_format_ymd_hms(dt,v->opened_at);
-    int fg=(i==sel)?97:90;
-    int bg=(i==sel)?47:49;
+    int fg=(i==consult_sel)?97:90;
+    int bg=(i==consult_sel)?47:49;
     ui_print(row+i,c.x+2,fg,bg,"%4d %-28s %-19s %.28s",v->id,p.name,dt,v->complaint);
   }
 
   if(k>0){
-    Visit v=list[idxs[sel]];
+    Visit v=list[idxs[consult_sel]];
     MedicalNote m; bool hasM=repo_medical_find_by_visit(v.id,&m);
     Prescription rx; repo_rx_get_or_create_for_visit(v.id,&rx);
     PrescriptionItem items[64]; int ni=repo_rx_items_list(rx.id,items,64);

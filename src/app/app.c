@@ -2,6 +2,7 @@
 
 #include "app/router.h"
 #include "core/input.h"
+#include "security/auth.h"
 #include "security/rbac.h"
 #include "ui/layout.h"
 #include "ui/widgets.h"

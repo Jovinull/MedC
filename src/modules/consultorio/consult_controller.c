@@ -8,10 +8,10 @@
 #include "core/str.h"
 #include <string.h>
 
-static int sel=0;
+int consult_sel=0;
 
 void consult_controller_reset(void){
-  sel=0;
+  consult_sel=0;
   repo_visits_init_store();
   repo_medical_init_store();
   repo_rx_init_store();
@@ -101,25 +101,25 @@ void consult_controller_key(App *app, KeyEvent ev){
   for(int i=0;i<n;i++){
     if(list[i].status==VISIT_EM_CONSULTA) idxs[k++]=i;
   }
-  if(sel>=k) sel = k? k-1:0;
+  if(consult_sel>=k) consult_sel = k? k-1:0;
 
-  if(ev.type==KEY_UP){ if(sel>0) sel--; return; }
-  if(ev.type==KEY_DOWN){ if(sel<k-1) sel++; return; }
+  if(ev.type==KEY_UP){ if(consult_sel>0) consult_sel--; return; }
+  if(ev.type==KEY_DOWN){ if(consult_sel<k-1) consult_sel++; return; }
 
   if(ev.type==KEY_CHAR && (ev.ch=='p'||ev.ch=='P') && k>0){
-    Visit v=list[idxs[sel]];
+    Visit v=list[idxs[consult_sel]];
     rx_manage(app,&v);
     return;
   }
 
   if(ev.type==KEY_CHAR && (ev.ch=='e'||ev.ch=='E') && k>0){
-    Visit v=list[idxs[sel]];
+    Visit v=list[idxs[consult_sel]];
     consult_fill(app,&v);
     return;
   }
 
   if(ev.type==KEY_ENTER && k>0){
-    Visit v=list[idxs[sel]];
+    Visit v=list[idxs[consult_sel]];
     close_visit(app,&v);
     return;
   }
