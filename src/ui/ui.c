@@ -35,24 +35,53 @@ void ui_get_term_size(int *out_w, int *out_h) {
 }
 #endif
 
+static char s_stdout_buf[1 << 16]; /* 64 KiB buffer for flicker-free output */
+
 void ui_init(Ui *ui) {
   memset(ui, 0, sizeof(*ui));
+#if defined(_WIN32)
+  /* Enable ANSI escape sequences and UTF-8 output on Windows console */
+  {
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD mode = 0;
+    GetConsoleMode(hOut, &mode);
+    mode |= 0x0004; /* ENABLE_VIRTUAL_TERMINAL_PROCESSING */
+    SetConsoleMode(hOut, mode);
+    SetConsoleOutputCP(65001);
+  }
+#endif
+  /* Full-buffered stdout: everything accumulates until fflush in ui_end.
+     This eliminates flicker — the terminal sees one big write per frame. */
+  setvbuf(stdout, s_stdout_buf, _IOFBF, sizeof(s_stdout_buf));
+  /* Enter alternate screen buffer so original terminal is restored on exit */
+  printf("\x1b[?1049h");
+  fflush(stdout);
   ui_get_term_size(&ui->term_w, &ui->term_h);
   ui->dirty = true;
 }
 
 void ui_shutdown(Ui *ui) {
   (void)ui;
+  ansi_hide_cursor(false);
+  ansi_reset();
+  /* Leave alternate screen buffer */
+  printf("\x1b[?1049l");
+  fflush(stdout);
+  /* Restore line-buffered stdout */
+  setvbuf(stdout, NULL, _IOLBF, 0);
 }
 
 void ui_begin(Ui *ui) {
   ui_get_term_size(&ui->term_w, &ui->term_h);
   ansi_hide_cursor(true);
+  /* Full-screen clear is fine because stdout is fully-buffered.
+     It goes into the buffer along with all draw calls and only appears
+     on screen when ui_end flushes — so there is no visible flash. */
   ansi_clear();
   ansi_move(1, 1);
   ansi_set_bg(CLR_BG_APP);
   ansi_set_fg(CLR_FG_TEXT);
-  fflush(stdout);
+  /* Do NOT fflush here — let everything buffer until ui_end */
   ui->dirty = false;
 }
 
@@ -64,17 +93,20 @@ void ui_end(Ui *ui) {
 }
 
 Rect ui_layout_header(Ui *ui) {
+  /* Rect = {x(col), y(row), w, h} */
   Rect r = {1, 1, ui->term_w, 3};
   return r;
 }
 
 Rect ui_layout_sidebar(Ui *ui) {
-  Rect r = {4, 1, 28, ui->term_h - 4};
+  /* col=1, row=4 (below 3-row header), width=28 */
+  Rect r = {1, 4, 28, ui->term_h - 4};
   return r;
 }
 
 Rect ui_layout_content(Ui *ui) {
-  Rect r = {4, 29, ui->term_w - 29 + 1, ui->term_h - 4};
+  /* col=29 (after 28-col sidebar), row=4 */
+  Rect r = {29, 4, ui->term_w - 29 + 1, ui->term_h - 4};
   return r;
 }
 
