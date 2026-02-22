@@ -55,6 +55,9 @@ void ui_init(Ui *ui) {
   setvbuf(stdout, s_stdout_buf, _IOFBF, sizeof(s_stdout_buf));
   /* Enter alternate screen buffer so original terminal is restored on exit */
   printf("\x1b[?1049h");
+  /* Disable auto-wrap — text that exceeds the right edge is clipped,
+     preventing long lines from wrapping into adjacent UI panels */
+  printf("\x1b[?7l");
   fflush(stdout);
   ui_get_term_size(&ui->term_w, &ui->term_h);
   ui->dirty = true;
@@ -64,7 +67,8 @@ void ui_shutdown(Ui *ui) {
   (void)ui;
   ansi_hide_cursor(false);
   ansi_reset();
-  /* Leave alternate screen buffer */
+  /* Re-enable auto-wrap and leave alternate screen buffer */
+  printf("\x1b[?7h");
   printf("\x1b[?1049l");
   fflush(stdout);
   /* Restore line-buffered stdout */
