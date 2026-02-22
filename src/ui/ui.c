@@ -80,27 +80,27 @@ Rect ui_layout_content(Ui *ui) {
 
 void ui_draw_hline(int row, int col, int w) {
   ansi_move(row, col);
-  for (int i = 0; i < w; i++) putchar('─');
+  for (int i = 0; i < w; i++) fputs("\xe2\x94\x80", stdout); /* ─ */
 }
 
 void ui_draw_box(Rect r) {
   int x = r.x, y = r.y, w = r.w, h = r.h;
   ansi_move(y, x);
-  putchar('┌');
-  for (int i = 0; i < w - 2; i++) putchar('─');
-  putchar('┐');
+  fputs("\xe2\x94\x8c", stdout); /* ┌ */
+  for (int i = 0; i < w - 2; i++) fputs("\xe2\x94\x80", stdout); /* ─ */
+  fputs("\xe2\x94\x90", stdout); /* ┐ */
 
   for (int j = 1; j < h - 1; j++) {
     ansi_move(y + j, x);
-    putchar('│');
+    fputs("\xe2\x94\x82", stdout); /* │ */
     ansi_move(y + j, x + w - 1);
-    putchar('│');
+    fputs("\xe2\x94\x82", stdout); /* │ */
   }
 
   ansi_move(y + h - 1, x);
-  putchar('└');
-  for (int i = 0; i < w - 2; i++) putchar('─');
-  putchar('┘');
+  fputs("\xe2\x94\x94", stdout); /* └ */
+  for (int i = 0; i < w - 2; i++) fputs("\xe2\x94\x80", stdout); /* ─ */
+  fputs("\xe2\x94\x98", stdout); /* ┘ */
 }
 
 void ui_print(int row, int col, int fg, int bg, const char *fmt, ...) {

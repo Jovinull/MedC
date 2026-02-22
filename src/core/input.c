@@ -1,10 +1,86 @@
 #include "core/input.h"
 
 #include <stdio.h>
-#include <unistd.h>
 
-#if !defined(_WIN32)
+/* ================================================================== */
+/*  Windows implementation using Win32 Console API                     */
+/* ================================================================== */
+#if defined(_WIN32)
+
+#include <conio.h>
+#include <windows.h>
+
+static DWORD g_old_mode = 0;
+static HANDLE g_hin     = INVALID_HANDLE_VALUE;
+static bool   g_raw     = false;
+
+bool input_enable_raw(void) {
+  if (g_raw) return true;
+  g_hin = GetStdHandle(STD_INPUT_HANDLE);
+  if (g_hin == INVALID_HANDLE_VALUE) return false;
+
+  if (!GetConsoleMode(g_hin, &g_old_mode)) return false;
+
+  DWORD mode = g_old_mode;
+  mode &= ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT);
+  if (!SetConsoleMode(g_hin, mode)) return false;
+
+  /* Enable UTF-8 output so box-drawing chars display correctly */
+  SetConsoleOutputCP(65001);
+
+  g_raw = true;
+  return true;
+}
+
+void input_disable_raw(void) {
+  if (!g_raw) return;
+  SetConsoleMode(g_hin, g_old_mode);
+  g_raw = false;
+}
+
+KeyEvent input_read_key(void) {
+  KeyEvent e = {KEY_NONE, 0};
+
+  if (!_kbhit()) return e;
+
+  int c = _getch();
+
+  /* Arrow keys and F-keys come as 0x00 or 0xE0 prefix + second byte */
+  if (c == 0x00 || c == 0xE0) {
+    int c2 = _getch();
+    switch (c2) {
+      case 72: e.type = KEY_UP;    return e;
+      case 80: e.type = KEY_DOWN;  return e;
+      case 75: e.type = KEY_LEFT;  return e;
+      case 77: e.type = KEY_RIGHT; return e;
+      case 59: e.type = KEY_F1;    return e;
+      default: return e;
+    }
+  }
+
+  if (c == 27)             { e.type = KEY_ESC;       return e; }
+  if (c == '\r' || c == '\n') { e.type = KEY_ENTER;  return e; }
+  if (c == 8)              { e.type = KEY_BACKSPACE;  return e; }
+  if (c == 19)             { e.type = KEY_CTRL_S;     return e; } /* Ctrl+S */
+  if (c == '/')            { e.type = KEY_SLASH;      return e; }
+
+  if (c >= 32 && c <= 126) {
+    e.type = KEY_CHAR;
+    e.ch   = (char)c;
+    return e;
+  }
+
+  return e;
+}
+
+/* ================================================================== */
+/*  POSIX / Linux implementation using termios                         */
+/* ================================================================== */
+#else
+
+#include <unistd.h>
 #include <termios.h>
+
 static struct termios g_old;
 static bool g_raw = false;
 
@@ -17,7 +93,7 @@ bool input_enable_raw(void) {
   raw.c_oflag &= ~(OPOST);
   raw.c_cflag |= (CS8);
   raw.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
-  raw.c_cc[VMIN] = 0;
+  raw.c_cc[VMIN]  = 0;
   raw.c_cc[VTIME] = 1;
 
   if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) return false;
@@ -65,24 +141,18 @@ KeyEvent input_read_key(void) {
     return e;
   }
 
-  if (c == '\r' || c == '\n') { e.type = KEY_ENTER; return e; }
-  if (c == 127 || c == 8) { e.type = KEY_BACKSPACE; return e; }
-  if (c == 19) { e.type = KEY_CTRL_S; return e; }     /* Ctrl+S */
-  if (c == '/') { e.type = KEY_SLASH; return e; }
+  if (c == '\r' || c == '\n') { e.type = KEY_ENTER;     return e; }
+  if (c == 127 || c == 8)     { e.type = KEY_BACKSPACE;  return e; }
+  if (c == 19)                 { e.type = KEY_CTRL_S;     return e; } /* Ctrl+S */
+  if (c == '/')                { e.type = KEY_SLASH;      return e; }
 
   if (c >= 32 && c <= 126) {
     e.type = KEY_CHAR;
-    e.ch = (char)c;
+    e.ch   = (char)c;
     return e;
   }
 
   return e;
 }
 
-#else
-/* Windows não suportado neste MVP sem adapter.
-   Mantém build em ambientes POSIX/Linux (como você usa no servidor). */
-bool input_enable_raw(void) { return false; }
-void input_disable_raw(void) {}
-KeyEvent input_read_key(void) { KeyEvent e={KEY_NONE,0}; return e; }
 #endif
