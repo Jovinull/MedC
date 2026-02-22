@@ -18,7 +18,7 @@ void dt_format_hhmm(char out[6]) {
   snprintf(out, 6, "%02d:%02d", tmv.tm_hour, tmv.tm_min);
 }
 
-void dt_format_ymd_hms(char out[20], int64_t ts) {
+void dt_format_ymd_hms(char out[32], int64_t ts) {
   time_t t = (time_t)ts;
   struct tm tmv;
 #if defined(_WIN32)
@@ -26,7 +26,14 @@ void dt_format_ymd_hms(char out[20], int64_t ts) {
 #else
   localtime_r(&t, &tmv);
 #endif
-  snprintf(out, 20, "%04d-%02d-%02d %02d:%02d:%02d",
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+#endif
+  snprintf(out, 32, "%04d-%02d-%02d %02d:%02d:%02d",
            tmv.tm_year + 1900, tmv.tm_mon + 1, tmv.tm_mday,
            tmv.tm_hour, tmv.tm_min, tmv.tm_sec);
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 }

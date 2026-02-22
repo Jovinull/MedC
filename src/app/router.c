@@ -19,6 +19,7 @@ static void render_home(App *app, Rect c) {
 }
 
 void router_on_route_change(App *app) {
+  (void)app;
   /* cada controller pode resetar estado interno */
   patients_controller_reset();
   recepcao_controller_reset();

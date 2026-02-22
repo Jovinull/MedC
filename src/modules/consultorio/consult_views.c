@@ -26,7 +26,7 @@ void consult_views_draw(App *app, Rect c){
   for(int i=0;i<k && i< (c.h-12); i++){
     Visit *v=&list[idxs[i]];
     Patient p; repo_patients_find_by_id(v->patient_id,&p);
-    char dt[20]; dt_format_ymd_hms(dt,v->opened_at);
+    char dt[32]; dt_format_ymd_hms(dt,v->opened_at);
     int fg=(i==consult_sel)?97:90;
     int bg=(i==consult_sel)?47:49;
     ui_print(row+i,c.x+2,fg,bg,"%4d %-28s %-19s %.28s",v->id,p.name,dt,v->complaint);

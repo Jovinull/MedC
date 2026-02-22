@@ -26,11 +26,13 @@ void widgets_draw_sidebar(Ui *ui, Rect r, const char *title, const char *items[]
 }
 
 void widgets_draw_table_header(Ui *ui, int row, int col, const char *title) {
+  (void)ui;
   ui_print(row, col, CLR_FG_ACCENT, CLR_BG_DEFAULT, "%s", title);
   ui_print(row + 1, col, CLR_FG_MUTED, CLR_BG_DEFAULT, "────────────────────────────────────────────────────────────────────────");
 }
 
 void widgets_draw_kv(Ui *ui, int row, int col, const char *k, const char *v) {
+  (void)ui;
   ui_print(row, col, CLR_FG_MUTED, CLR_BG_DEFAULT, "%-14s", k);
   ui_print(row, col + 16, CLR_FG_TEXT, CLR_BG_DEFAULT, "%s", v ? v : "");
 }

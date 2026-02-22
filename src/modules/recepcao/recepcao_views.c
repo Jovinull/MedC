@@ -36,7 +36,7 @@ void recepcao_views_draw(App *app, Rect c){
     Visit *v=&list[idxs[i]];
     Patient p; p.id=0;
     repo_patients_find_by_id(v->patient_id,&p);
-    char dt[20]; dt_format_ymd_hms(dt,v->opened_at);
+    char dt[32]; dt_format_ymd_hms(dt,v->opened_at);
 
     int fg=(i==recepcao_sel)?97:90;
     int bg=(i==recepcao_sel)?47:49;

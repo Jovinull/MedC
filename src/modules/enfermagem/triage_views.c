@@ -24,7 +24,7 @@ void triage_views_draw(App *app, Rect c){
   for(int i=0;i<k && i< (c.h-9); i++){
     Visit *v=&list[idxs[i]];
     Patient p; repo_patients_find_by_id(v->patient_id,&p);
-    char dt[20]; dt_format_ymd_hms(dt,v->opened_at);
+    char dt[32]; dt_format_ymd_hms(dt,v->opened_at);
 
     int fg=(i==triage_sel)?97:90;
     int bg=(i==triage_sel)?47:49;

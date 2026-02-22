@@ -43,7 +43,7 @@ void admin_views_draw(App *app, Rect c){
     ui_print(c.y+7,c.x+2,90,49,"TS                  User  Ação            Entidade   ID   Detalhes");
     int row=c.y+8;
     for(int i=0;i<n && i< (c.h-12); i++){
-      char dt[20]; dt_format_ymd_hms(dt,a[i].ts);
+      char dt[32]; dt_format_ymd_hms(dt,a[i].ts);
       ui_print(row+i,c.x+2,90,49,"%-19s %4d %-14s %-9s %4d %.34s",
                dt,a[i].user_id,a[i].action,a[i].entity,a[i].entity_id,a[i].details);
     }
